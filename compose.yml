@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      dockerfile_inline: |
+        FROM python:3.12
+        WORKDIR /app
+        COPY requirements.txt .
+        RUN pip install --no-cache-dir --upgrade -r requirements.txt
+        COPY main.py .
+    entrypoint:
+      - "/bin/bash"
+      - "-c"
+      - "fastapi run main.py --port 8080"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: "wget --no-verbose --tries=1 http://localhost:8080/status || exit 1"

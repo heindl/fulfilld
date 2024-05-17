@@ -1,0 +1,53 @@
+version: "3"
+
+vars:
+  VENV: "{{.ROOT_DIR}}/venv"
+  PYTHON: "{{.ROOT_DIR}}/venv/bin/python"
+
+tasks:
+  install:
+    cmds:
+      - "{{.PYTHON}} -m pip install -r requirements-dev.txt"
+    deps:
+      - deps:venv
+    sources:
+      - "requirements-dev.txt"
+      - "requirements.txt"
+      - "{{.VENV}}"
+
+  upgrade:
+    deps:
+      - deps:venv
+    cmds:
+      - "{{.PYTHON}} -m pip install --upgrade pip"
+      - "{{.PYTHON}} -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt"
+
+  lint:
+    deps:
+      - deps:venv
+    cmds:
+      - "{{.PYTHON}} -m ruff check --fix ."
+      - "{{.PYTHON}} -m ruff format ."
+      - "{{.PYTHON}} -m mypy --pretty --warn-unused-configs ."
+    sources:
+      - "*.py"
+
+  test:
+    deps:
+      - deps:venv
+    cmd: "{{.PYTHON}} -m pytest"
+    sources:
+      - "*.py"
+
+  run:
+    deps:
+      - deps:venv
+    cmd: "{{.VENV}}/bin/fastapi run main.py --port 8080"
+
+  deps:venv:
+    internal: true
+    cmds:
+      - "python3.12 -m venv {{.VENV}}"
+      - "source {{.VENV}}/bin/activate"
+    status:
+      - "test -f {{.VENV}}/bin/activate"

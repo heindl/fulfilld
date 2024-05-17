@@ -1,0 +1,6 @@
+.ruff_cache
+.task
+.mypy_cache
+.pytest_cache
+venv
+.idea
